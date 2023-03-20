@@ -9,12 +9,21 @@ $config = [
     'bootstrap' => ['log'],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
-        '@npm'   => '@vendor/npm-asset',
+        '@npm' => '@vendor/npm-asset',
     ],
     'components' => [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => 'ORk7nTz5Lx0H817yQUWLWCSAy2Ix9USt',
+            'cookieValidationKey' => 'jvGAHklnnTuzlZZAlHheaP2nD__P8Ahz',
+            'parsers' => [
+                'application/json' => \yii\web\JsonParser::class,
+            ]
+        ],
+        'jwt' => [
+            'class' => \sizeg\jwt\Jwt::class,
+            'key' => 'SECRET-KEY',
+            //typically a long random string
+            'jwtValidationData' => \app\components\JwtValidationData::class,
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -42,14 +51,29 @@ $config = [
             ],
         ],
         'db' => $db,
-        /*
         'urlManager' => [
+            'class' => 'yii\web\UrlManager',
             'enablePrettyUrl' => true,
             'showScriptName' => false,
+            'enableStrictParsing' => false,
             'rules' => [
+                'diary/<id:\d+>' => 'site/diary',
+                'dashboard/<page:\d+>' => 'site/dashboard',
+                'login' => 'site/login',
+                'logout' => 'site/logout',
+                'POST register' => 'site/register',
+                'POST auth/login' => 'auth/login',
+                'POST post/<id:\d+>' => 'site/post',
+                'GET editpost/<post:\d+>' => "site/editpost",
+                'POST editpost/<post:\d+>' => "site/editpostupdate",
+                'GET deletepost/<post:\d+>' => "site/editpostdelete",
+                "error" => "site/error",
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'api/post'],
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'api/diary'],
+
             ],
         ],
-        */
+
     ],
     'params' => $params,
 ];

@@ -1,18 +1,22 @@
-<?php
+<?
 
 namespace app\models;
 
-class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
+class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 {
-    public $id;
-    public $username;
-    public $password;
-    public $authKey;
-    public $accessToken;
+
+    public static function tableName()
+    {
+        return 'users';
+    }
+    public function Getdiarys()
+    {
+        return $this->hasMany(Diary::className(), ["user_id" => "id"]);
+    }
 
     private static $users = [
-        '100' => [
-            'id' => '100',
+        '1' => [
+            'id' => '1',
             'username' => 'admin',
             'password' => 'admin',
             'authKey' => 'test100key',
@@ -33,22 +37,25 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
      */
     public static function findIdentity($id)
     {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+        return self::find()->where(["id" => $id])->all()[0];
     }
 
     /**
      * {@inheritdoc}
      */
-    public static function findIdentityByAccessToken($token, $type = null)
-    {
-        foreach (self::$users as $user) {
-            if ($user['accessToken'] === $token) {
-                return new static($user);
-            }
-        }
+    public static function findIdentityByAccessToken($token, $type = null) {
+		return static::find()
+			->where(['id' => (string) $token->getClaim('uid') ])->one();
+	}
 
-        return null;
-    }
+    public function afterSave($isInsert, $changedOldAttributes) {
+		// Purge the user tokens when the password is changed
+		if (array_key_exists('usr_password', $changedOldAttributes)) {
+			\app\models\UserRefreshToken::deleteAll(['urf_userID' => $this->userID]);
+		}
+
+		return parent::afterSave($isInsert, $changedOldAttributes);
+	}
 
     /**
      * Finds user by username
@@ -58,12 +65,6 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
      */
     public static function findByUsername($username)
     {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
-
         return null;
     }
 
