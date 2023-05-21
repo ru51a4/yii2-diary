@@ -18,7 +18,7 @@ class Diary extends ActiveRecord
     public static function tableName()
     {
         return 'diaries';
-    } 
+    }
     public function rules()
     {
         return [
@@ -32,7 +32,8 @@ class Diary extends ActiveRecord
 
     public function Getpost()
     {
-        return $this->hasMany(Post::className(), ["diary_id" => "id"]);
+        return $this->hasMany(Post::className(), ["diary_id" => "id"])->orderBy('id');
+        ;
     }
 
 

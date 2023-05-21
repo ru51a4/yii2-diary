@@ -28,7 +28,9 @@ class SiteController extends Controller
     }
     public function actionDashboard($page)
     {
-        $diarys = \app\models\Diary::find()->with('user')->orderBy(["id" => SORT_DESC])->limit(5)->offset(($page - 1) * 5);
+        $diarys = \app\models\Diary::find()->alias("a")
+            ->innerJoin("(SELECT diary_id as di, MAX(id) as kek FROM posts group by diary_id) gg", "a.id = gg.di")
+            ->orderBy(["gg.kek" => SORT_DESC])->with('user')->limit(5)->offset(($page - 1) * 5);
         $count = $diarys->count();
         $diarys = $diarys->all();
         $pages = ($count % 5 === 0) ? $count / 5 : $count / 5 + 1;
